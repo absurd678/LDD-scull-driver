@@ -7,7 +7,7 @@
 
 int scull_major = 0;		
 int scull_minor = 0;		
-int scull_nr_devs = 1;		
+int scull_nr_devs = 3;		
 int scull_quantum = 4000;	
 int scull_qset = 1000;		
 
@@ -173,7 +173,7 @@ ssize_t scull_read(struct file *flip, char __user *buf, size_t count,
 		count = dev->size - *f_pos;
 	}
 
-	item = abs((dev->size - 1) - ((long)*f_pos / itemsize));	// Находим позицию с конца файла
+	item = (long)*f_pos / itemsize;	// Находим позицию с конца файла
 	rest = (long)*f_pos % itemsize;	
 
 	s_pos = rest / quantum;			
@@ -214,7 +214,7 @@ ssize_t scull_write(struct file *flip, const char __user *buf, size_t count,
 	if (down_interruptible(&dev->sem))
 		return -ERESTARTSYS;
 
-	item = abs((dev->size - 1) - ((long)*f_pos / itemsize)); // Находим позицию с конца файла
+	item = (long)*f_pos / itemsize; // Находим позицию с конца файла
 	rest = (long)*(f_pos) % itemsize;	// Не знаю что с этим делать
 	
 	s_pos = rest / quantum;
@@ -282,6 +282,8 @@ static void scull_setup_cdev(struct scull_dev *dev, int index)
 
 	if (err)
 		printk(KERN_NOTICE "Error %d adding scull  %d", err, index);
+	
+	printk(KERN_INFO "registered device n. %d", scull_minor + index);
 }
 
 void scull_cleanup_module(void)
